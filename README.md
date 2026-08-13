@@ -182,7 +182,7 @@ The portfolio includes my SIWES experience at:
 **Kano State Computer Centre**
 Civil Service Commission, Kano State
 
-**February 2024 – July 2024**
+#### February 2024 – July 2024
 
 The experience involved exposure to:
 
@@ -198,12 +198,12 @@ The experience involved exposure to:
 
 ### 🎓 Education
 
-**Bachelor of Science in Software Engineering**
+#### Bachelor of Science in Software Engineering
 
 Maryam Abacha American University of Nigeria
 Kano State
 
-**2025**
+#### 2025
 
 ---
 
@@ -422,7 +422,7 @@ The source code can be used as a reference for learning and personal projects. P
 
 ### Musbahu Abdullahi Iliyasu
 
-**Software Engineer | Full-Stack Developer**
+#### Software Engineer | Full-Stack Developer
 
 📍 Kano, Nigeria
 
