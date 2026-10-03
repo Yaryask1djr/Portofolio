@@ -1500,3 +1500,19 @@ html:not(.js) .theme-toggle, html:not(.js) .menu-toggle { display: none; }
     html:not(.js) .nav-menu a { padding: 5px 0; }
     html:not(.js) .hero { padding-top: 200px; }
 }
+
+/* Keep dark-theme hover controls readable and keyboard-focused cards visible. */
+body.dark-mode .social-links a:hover,
+body.dark-mode .footer-socials a:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+.reveal:focus-within {
+    opacity: 1;
+    transform: none;
+}
+@media (max-width: 768px) {
+    html:not(.js) .navbar { position: static; }
+    html:not(.js) .hero { padding-top: 50px; }
+}
