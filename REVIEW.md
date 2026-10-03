@@ -61,3 +61,12 @@ and link destinations beyond repository existence were not independently verifie
 No CV, fabricated project screenshots, performance figures, credential claims or
 working demo URLs were invented. No secrets, form backend or additional application
 framework were introduced. The workflow deploys `main` only and does not run on push.
+
+## Follow-up review
+
+Dark-mode social hover controls now use a darker blue background to retain contrast
+with white icons. Keyboard focus reveals an animated card immediately. The mobile
+header uses normal document flow without JavaScript, avoiding a fixed multi-row
+menu obscuring anchor destinations. JavaScript syntax and whitespace checks passed
+again; rendered visual checks remain pending. The earlier temporary JSDOM harness
+was unavailable in this follow-up environment, so its 40 assertions were not rerun.
