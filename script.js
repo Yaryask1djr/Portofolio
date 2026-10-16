@@ -1,195 +1,99 @@
-/* =====================================================
-   MOBILE NAVIGATION
-===================================================== */
+"use strict";
+
+document.documentElement.classList.add("js");
 
 const menuToggle = document.getElementById("menuToggle");
 const navMenu = document.getElementById("navMenu");
-
-menuToggle.addEventListener("click", () => {
-
-    navMenu.classList.toggle("active");
-
-    const icon = menuToggle.querySelector("i");
-
-    if (navMenu.classList.contains("active")) {
-
-        icon.classList.remove("fa-bars");
-        icon.classList.add("fa-xmark");
-
-    } else {
-
-        icon.classList.remove("fa-xmark");
-        icon.classList.add("fa-bars");
-
-    }
-
-});
-
-
-/* =====================================================
-   CLOSE MOBILE MENU WHEN LINK IS CLICKED
-===================================================== */
-
 const navLinks = document.querySelectorAll(".nav-menu a");
+const mobileViewport = window.matchMedia("(max-width: 768px)");
 
-navLinks.forEach(link => {
-
-    link.addEventListener("click", () => {
-
-        navMenu.classList.remove("active");
-
-        const icon = menuToggle.querySelector("i");
-
-        icon.classList.remove("fa-xmark");
-        icon.classList.add("fa-bars");
-
-    });
-
-});
-
-
-/* =====================================================
-   DARK / LIGHT MODE
-===================================================== */
-
-const themeToggle = document.getElementById("themeToggle");
-
-const savedTheme = localStorage.getItem("portfolio-theme");
-
-if (savedTheme === "dark") {
-
-    document.body.classList.add("dark-mode");
-
-    themeToggle.innerHTML =
-        '<i class="fas fa-sun"></i>';
-
+function setMenu(open) {
+    navMenu.classList.toggle("active", open);
+    menuToggle.setAttribute("aria-expanded", String(open));
+    menuToggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    menuToggle.querySelector("i").className = open ? "fas fa-xmark" : "fas fa-bars";
 }
 
-
-themeToggle.addEventListener("click", () => {
-
-    document.body.classList.toggle("dark-mode");
-
-    const isDark =
-        document.body.classList.contains("dark-mode");
-
-    if (isDark) {
-
-        themeToggle.innerHTML =
-            '<i class="fas fa-sun"></i>';
-
-        localStorage.setItem(
-            "portfolio-theme",
-            "dark"
-        );
-
-    } else {
-
-        themeToggle.innerHTML =
-            '<i class="fas fa-moon"></i>';
-
-        localStorage.setItem(
-            "portfolio-theme",
-            "light"
-        );
-
+menuToggle.addEventListener("click", () => {
+    setMenu(menuToggle.getAttribute("aria-expanded") !== "true");
+});
+navLinks.forEach(link => link.addEventListener("click", () => setMenu(false)));
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
+        setMenu(false);
+        menuToggle.focus();
     }
+});
+document.addEventListener("click", event => {
+    if (!event.target.closest(".nav-container")) setMenu(false);
+});
+mobileViewport.addEventListener("change", () => setMenu(false));
 
+const themeToggle = document.getElementById("themeToggle");
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+let themePreference;
+// Storage can be blocked in private browsers or embedded previews.
+try {
+    themePreference = localStorage.getItem("portfolio-theme");
+} catch { /* Use the system preference when storage is unavailable. */ }
+if (!["dark", "light"].includes(themePreference)) themePreference = null;
+
+function applyTheme(dark) {
+    document.body.classList.toggle("dark-mode", dark);
+    themeToggle.setAttribute("aria-pressed", String(dark));
+    themeToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    themeToggle.querySelector("i").className = dark ? "fas fa-sun" : "fas fa-moon";
+    document.querySelector('meta[name="theme-color"]').content = dark ? "#0f172a" : "#2563eb";
+}
+applyTheme(themePreference ? themePreference === "dark" : systemTheme.matches);
+themeToggle.addEventListener("click", () => {
+    const dark = !document.body.classList.contains("dark-mode");
+    themePreference = dark ? "dark" : "light";
+    applyTheme(dark);
+    try { localStorage.setItem("portfolio-theme", themePreference); } catch { /* Keep the theme for this visit. */ }
+});
+systemTheme.addEventListener("change", event => {
+    if (!themePreference) applyTheme(event.matches);
 });
 
-
-/* =====================================================
-   ACTIVE NAVIGATION LINK
-===================================================== */
-
-const sections =
-    document.querySelectorAll("section[id]");
-
-window.addEventListener("scroll", () => {
-
-    let currentSection = "";
-
-    sections.forEach(section => {
-
-        const sectionTop =
-            section.offsetTop - 150;
-
-        const sectionHeight =
-            section.offsetHeight;
-
-        if (
-            window.scrollY >= sectionTop &&
-            window.scrollY <
-                sectionTop + sectionHeight
-        ) {
-
-            currentSection =
-                section.getAttribute("id");
-
-        }
-
-    });
-
-
+// Batch geometry reads and avoid doing layout work for every scroll event.
+const sections = [...document.querySelectorAll("section[id]")];
+let scrollPending = false;
+function updateActiveLink() {
+    let current = sections[0]?.id;
+    for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 150) current = section.id;
+    }
     navLinks.forEach(link => {
-
-        link.classList.remove("active");
-
-        if (
-            link.getAttribute("href") ===
-            `#${currentSection}`
-        ) {
-
-            link.classList.add("active");
-
-        }
-
+        const active = link.getAttribute("href") === `#${current}`;
+        link.classList.toggle("active", active);
+        if (active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
     });
+    scrollPending = false;
+}
+window.addEventListener("scroll", () => {
+    if (!scrollPending) {
+        scrollPending = true;
+        window.requestAnimationFrame(updateActiveLink);
+    }
+}, { passive: true });
+window.addEventListener("resize", updateActiveLink);
+updateActiveLink();
 
-});
-
-
-/* =====================================================
-   REVEAL SECTIONS ON SCROLL
-===================================================== */
-
-const revealElements =
-    document.querySelectorAll(
-        ".section, .project-card, .skill-card, .service-card"
-    );
-
-
-const revealObserver =
-    new IntersectionObserver(
-        entries => {
-
-            entries.forEach(entry => {
-
-                if (entry.isIntersecting) {
-
-                    entry.target.classList.add(
-                        "revealed"
-                    );
-
-                    revealObserver.unobserve(
-                        entry.target
-                    );
-
-                }
-
-            });
-
-        },
-        {
-            threshold: 0.1
-        }
-    );
-
-
-revealElements.forEach(element => {
-
-    element.classList.add("reveal");
-
-    revealObserver.observe(element);
-
-});
+// Observe cards only: hiding whole sections also hides their nested content.
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+if ("IntersectionObserver" in window && !reducedMotion.matches) {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("revealed");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.05 });
+    document.querySelectorAll(".project-card, .skill-card, .service-card").forEach(element => {
+        element.classList.add("reveal");
+        observer.observe(element);
+    });
+}
